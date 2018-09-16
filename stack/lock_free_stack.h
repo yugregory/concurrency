@@ -20,17 +20,17 @@ class lock_free_stack {
     public:
         void push(T const & data) {
             std::shared_ptr<node> const new_node = std::make_shared<node>(data);
-            new_node->next = std::atomic_load_explicit(&head, std::memory_order_relaxed);
+            new_node->next = std::atomic_load_explicit(&head, std::memory_order_acquire);
             // std::cout << "is shared pointer lock_free? " << std::atomic_is_lock_free(&head) << std::endl;
             while (!std::atomic_compare_exchange_weak_explicit(&head, &new_node->next, new_node,
-                                                            std::memory_order_relaxed, std::memory_order_relaxed));
+                                                    std::memory_order_release, std::memory_order_relaxed));
         }
         
         std::shared_ptr<T> pop() {
-            std::shared_ptr<node> old_head = std::atomic_load_explicit(&head, std::memory_order_relaxed);
+            std::shared_ptr<node> old_head = std::atomic_load_explicit(&head, std::memory_order_acquire);
             while (old_head && 
                     !std::atomic_compare_exchange_weak_explicit(&head, &old_head, old_head->next,
-                                                                std::memory_order_relaxed, std::memory_order_relaxed));
+                                                    std::memory_order_release, std::memory_order_relaxed));
             return old_head ? old_head->data : std::shared_ptr<T>();
         }
 };
