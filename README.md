@@ -1,2 +1,2 @@
 # concurrency
-testing lock free data structures in Concurrency in Action by Anthony Williams
+Working with multi-threaded topics
